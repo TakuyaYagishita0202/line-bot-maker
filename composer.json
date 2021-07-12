@@ -12,7 +12,8 @@
         "laravel-lang/lang": "^10.1",
         "laravel/framework": "^8.40",
         "laravel/tinker": "^2.5",
-        "laravel/ui": "^3.3"
+        "laravel/ui": "^3.3",
+        "linecorp/line-bot-sdk": "^7.0"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

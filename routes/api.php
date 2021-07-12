@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\WebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\EnsureLineSignatureIsValid;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,4 +18,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::post('/test/{id}', function($id) {
+    return response()->json(['message' => 'idは'.$id.'です。'], 200);
+})->name('test');
+
+Route::group(['middleware' => EnsureLineSignatureIsValid::class], function () {
+    Route::post('/webhook/{id}', [WebhookController::class, 'callback'])->name('webhook');
 });

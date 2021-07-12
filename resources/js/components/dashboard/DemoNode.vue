@@ -8,9 +8,9 @@
     </v-list-item>
 
     <v-card-actions>
-      <v-btn text @click="remove()">削除</v-btn>
+      <v-btn v-if="deletable" text @click="remove()">削除</v-btn>
       <v-spacer></v-spacer>
-      <flowy-drag-handle>
+      <flowy-drag-handle v-if="movable">
         <v-btn icon>
           <v-icon>mdi-drag-horizontal-variant</v-icon>
         </v-btn>
@@ -20,7 +20,7 @@
 </template>
 <script>
 export default {
-  props: ["remove", "node", "title", "description"],
+  props: ["remove", "node", "title", "description", "deletable", "movable"],
 
   data() {
     return {

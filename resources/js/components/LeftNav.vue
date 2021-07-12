@@ -5,7 +5,7 @@
         <v-img src="https://randomuser.me/api/portraits/men/85.jpg"></v-img>
       </v-list-item-avatar>
 
-      <v-list-item-title>John Leider</v-list-item-title>
+      <v-list-item-title>{{ username }}</v-list-item-title>
 
       <v-btn icon @click.stop="mini = !mini">
         <v-icon>mdi-chevron-left</v-icon>
@@ -25,6 +25,14 @@
         </v-list-item-content>
       </v-list-item>
     </v-list>
+
+    <template v-slot:append>
+      <div class="pa-2">
+        <v-btn block @click="logout">
+          ログアウト
+        </v-btn>
+      </div>
+    </template>
   </v-navigation-drawer>
 </template>
 
@@ -40,7 +48,26 @@ export default {
       { title: 'Users', icon: 'mdi-account-group-outline' },
     ],
     mini: true,
-	})
+	}),
+
+  methods: {
+    async logout () {
+      await this.$store.dispatch('auth/logout')
+
+      if (this.apiStatus) {
+        this.$router.push('/login')
+      }
+    }
+  },
+
+  computed: {
+    username () {
+      return this.$store.getters['auth/username']
+    },
+    apiStatus () {
+			return this.$store.state.auth.apiStatus
+		},
+  },
 };
 </script>
 

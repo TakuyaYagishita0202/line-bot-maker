@@ -6,19 +6,16 @@
         <router-view></router-view>
       </v-container>
     </v-main>
-    <right-nav v-if="isLogin" />
   </v-app>
 </template>
 
 <script>
 import LeftNav from './components/LeftNav.vue'
-import RightNav from './components/dashboard/RightNav.vue'
 import { INTERNAL_SERVER_ERROR } from './util'
 
 export default {
   components: {
     LeftNav,
-    RightNav,
   },
 
   computed: {

@@ -9,6 +9,11 @@ class ReplyPattern extends Model
 {
     use HasFactory;
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function reply_pattern_messages()
     {
         return $this->hasMany(ReplyPatternMessage::class)->orderBy('rank');
@@ -17,5 +22,10 @@ class ReplyPattern extends Model
     public function reply_patterns()
     {
         return $this->hasMany(ReplyPattern::class, 'parent_id')->orderBy('rank');
+    }
+
+    public function pattern_type()
+    {
+        return $this->hasOne(PatternType::class, 'id', 'pattern_type_id');
     }
 }

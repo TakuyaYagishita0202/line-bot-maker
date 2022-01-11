@@ -3,29 +3,42 @@
     <v-list-item>
       <v-list-item-content>
         <v-list-item-title class="headline mb-1">{{ title }}</v-list-item-title>
-        <v-list-item-subtitle>{{ description }}</v-list-item-subtitle>
+        <v-list-item-subtitle>
+          <span v-if="pattern">「{{ pattern }}」に</span>
+          <span v-if="pattern_type">{{ pattern_type }}</span>
+        </v-list-item-subtitle>
       </v-list-item-content>
     </v-list-item>
+    <v-card-text>{{ description }}</v-card-text>
 
     <v-card-actions>
-      <v-btn v-if="deletable" text @click="remove()">削除</v-btn>
+      <v-btn icon @click="addNewNode">
+        <v-icon>mdi-plus</v-icon>
+      </v-btn>
       <v-spacer></v-spacer>
-      <flowy-drag-handle v-if="movable">
-        <v-btn icon>
-          <v-icon>mdi-drag-horizontal-variant</v-icon>
-        </v-btn>
-      </flowy-drag-handle>
+      <v-btn icon @click="getNodeId">
+        <v-icon>mdi-square-edit-outline</v-icon>
+      </v-btn>
     </v-card-actions>
   </v-card>
 </template>
 <script>
 export default {
-  props: ["remove", "node", "title", "description", "deletable", "movable"],
+  props: ["remove", "add", "test", "node", "id", "title", "description", "pattern", "pattern_type", "deletable", "movable"],
 
   data() {
     return {
-      text: "This is component A",
+      node_id: this.id,
     };
   },
+
+  methods: {
+    getNodeId(){
+      this.$store.commit('node/setSelectedNodeId', this.node_id)
+    },
+    addNewNode(){
+      this.$store.commit('node/setNewNodeParentId', this.id)
+    }
+  }
 };
 </script>

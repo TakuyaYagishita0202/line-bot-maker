@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Message;
 use App\Models\MessageType;
 use App\Models\ReplyPattern;
 use App\Models\ReplyPatternMessage;
 use App\Models\ReplyState;
-use App\Models\TextMessage;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
@@ -35,7 +36,7 @@ class WebhookController extends Controller
                 case $event instanceof \LINE\LINEBot\Event\MessageEvent\TextMessage: // TODO: 現状はテキストメッセージのみ検知する
                     $reply_token = $event->getReplyToken();
 
-                    // 以下、後で削除
+                    // TODO: 以下、テスト後に削除
                     // $reply_message = '受信しました！';
                     // $bot->replyText($reply_token, $reply_message);
                     // break;
@@ -75,8 +76,12 @@ class WebhookController extends Controller
 
                     // 条件にマッチするreply_patternを探索
                     $matched_pattern = null;
+                    $pattern_types = array_column(DB::table('pattern_types')->get()->toArray(), 'pattern', 'id');
                     foreach($reply_patterns as $reply_pattern) {
-                        if(preg_match($reply_pattern->pattern, $event->getText()) > 0){
+                        $message = $event->getText();
+                        $pattern = $pattern_types[$reply_pattern->pattern_type_id];
+                        $replaced = str_replace('<PATTERN>', $message, $pattern);
+                        if(preg_match($replaced, $reply_pattern->pattern) > 0){
                             $matched_pattern = $reply_pattern;
                             break;
                         }
@@ -100,23 +105,21 @@ class WebhookController extends Controller
                         }
                         $multiMessageBuilder = new \LINE\LINEBot\MessageBuilder\MultiMessageBuilder();
                         foreach($reply_patern_messages as $reply_pattern_message){
+                            Log::info($reply_pattern_message);
                             $repeat_flg = $reply_pattern_message->repeat_flg;
-                            if($repeat_flg == 1){
-                                $message_type = MessageType::find(1);    
-                            } else {
-                                $message_type = MessageType::find($reply_pattern_message->message_type_id);
-                            }
-                            
-                            if($message_type->prefix == 'text'){
-                                // TODO: 現状emojiに対応していない
-                                if($repeat_flg == 1){
-                                    $reply_message = $event->getText();
-                                } else {
-                                    $reply_message = (TextMessage::where('id', $reply_pattern_message->message_id)->first())->text;
+                            if($repeat_flg != 1){
+                                switch($reply_pattern_message->message->message_type->prefix){
+                                    case 'text':
+                                        // TODO: 現状テキストメッセージのみ対応
+                                        $reply_message = (Message::where('id', $reply_pattern_message->message_id)->first())->text;
+                                        break;
                                 }
-                                $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder($reply_message);
-                                $multiMessageBuilder->add($textMessageBuilder);
+                            } else {
+                                $reply_message = $event->getText();
                             }
+
+                            $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder($reply_message);
+                            $multiMessageBuilder->add($textMessageBuilder);
                         }
                         $bot->replyMessage($reply_token, $multiMessageBuilder);
 
